@@ -1,0 +1,43 @@
+[package]
+name = "esp-bluetooth-application"
+version = "0.1.0"
+authors = ["Benjamin Stürmer <benjamin.stuermer@quartett-mobile.de>", "Patrick Willner <patrick.willner@quartett-mobile.de"]
+edition = "2021"
+license = "Apache-2.0"
+
+[dependencies]
+# Hardware abstraction layer
+esp-hal = { version = "0.18.0", features = [ "esp32s3" ] }
+# Wi-Fi, BLE and ESP-NOW support
+esp-wifi = { version = "0.6.0", features = [ "esp32s3"] }
+
+# print!, println!
+esp-println = { version = "0.9.1", features = ["esp32s3", "log"] }
+
+# Exception and panic handlers
+esp-backtrace = { version = "0.12.0", features = [
+    "esp32s3",
+    "exception-handler",
+    "panic-handler",
+    "println",
+] }
+
+# logging
+log = { version = "0.4.21" }
+
+[profile.dev]
+# Rust debug is too slow.
+# For debug builds always builds with some optimization
+opt-level = "s"
+# Explicitly disable LTO which the Xtensa codegen backend has issues
+lto = "off"
+
+[profile.release]
+codegen-units = 1 # LLVM can perform better optimizations using a single thread
+debug = 2
+debug-assertions = false
+incremental = false
+# Explicitly disable LTO which the Xtensa codegen backend has issues
+lto = "off"
+opt-level = 's'
+overflow-checks = false
