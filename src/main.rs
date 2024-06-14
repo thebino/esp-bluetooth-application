@@ -5,36 +5,40 @@ use bleps::{
     ad_structure::{
         create_advertising_data, AdStructure, BR_EDR_NOT_SUPPORTED, LE_GENERAL_DISCOVERABLE,
     },
-    attribute_server::{AttributeServer},
+    attribute_server::AttributeServer,
     gatt, Ble, HciConnector,
 };
 use esp_backtrace as _;
-use esp_hal::{
-    clock::ClockControl, peripherals::Peripherals, prelude::*, system::SystemControl,
-};
-use esp_wifi::ble::controller::BleConnector;
-use esp_wifi::{EspWifiInitFor};
 use esp_hal::rng::Rng;
-use rand_core::OsRng;
+use esp_hal::{clock::ClockControl, peripherals::Peripherals, prelude::*, system::SystemControl};
+use esp_wifi::ble::controller::BleConnector;
+use esp_wifi::EspWifiInitFor;
+
+use crate::rng::EspRng;
+
+mod rng;
 
 pub const SOC_NAME: &str = "ESP32-S3";
 
 #[entry]
 fn main() -> ! {
+    log::info!("starting ble app: setup");
+
     let peripherals = Peripherals::take();
     let system = SystemControl::new(peripherals.SYSTEM);
 
     let clocks = ClockControl::max(system.clock_control).freeze();
 
-
+    let rng = Rng::new(peripherals.RNG);
     let timer = esp_hal::timer::timg::TimerGroup::new(peripherals.TIMG1, &clocks, None).timer0;
     let init = esp_wifi::initialize(
         EspWifiInitFor::Ble,
         timer,
-        Rng::new(peripherals.RNG),
+        rng,
         peripherals.RADIO_CLK,
         &clocks,
-    ).unwrap();
+    )
+    .unwrap();
 
     let mut bluetooth = peripherals.BT;
 
@@ -54,7 +58,7 @@ fn main() -> ! {
                     AdStructure::ServiceUuids16(&[Uuid::Uuid16(0x1809)]),
                     AdStructure::CompleteLocalName(SOC_NAME),
                 ])
-                    .unwrap()
+                .unwrap()
             )
         );
 
@@ -105,46 +109,46 @@ fn main() -> ! {
             ],
         },]);
 
-        let mut rng = Rng::default();
-        let mut srv = AttributeServer::new(&mut ble, &mut gatt_attributes,&mut rng);
+        let mut ble_rng = EspRng(rng);
+        let _srv = AttributeServer::new(&mut ble, &mut gatt_attributes, &mut ble_rng);
 
         // loop {
         //     let mut notification = None;
-            //
-            // if button.is_low().unwrap() && debounce_cnt > 0 {
-            //     debounce_cnt -= 1;
-            //     if debounce_cnt == 0 {
-            //         let mut cccd = [0u8; 1];
-            //         if let Some(1) = srv.get_characteristic_value(
-            //             my_characteristic_notify_enable_handle,
-            //             0,
-            //             &mut cccd,
-            //         ) {
-            //             // if notifications enabled
-            //             if cccd[0] == 1 {
-            //                 notification = Some(NotificationData::new(
-            //                     my_characteristic_handle,
-            //                     &b"Notification"[..],
-            //                 ));
-            //             }
-            //         }
-            //     }
-            // };
-            //
-            // if button.is_high().unwrap() {
-            //     debounce_cnt = 500;
-            // }
+        //
+        // if button.is_low().unwrap() && debounce_cnt > 0 {
+        //     debounce_cnt -= 1;
+        //     if debounce_cnt == 0 {
+        //         let mut cccd = [0u8; 1];
+        //         if let Some(1) = srv.get_characteristic_value(
+        //             my_characteristic_notify_enable_handle,
+        //             0,
+        //             &mut cccd,
+        //         ) {
+        //             // if notifications enabled
+        //             if cccd[0] == 1 {
+        //                 notification = Some(NotificationData::new(
+        //                     my_characteristic_handle,
+        //                     &b"Notification"[..],
+        //                 ));
+        //             }
+        //         }
+        //     }
+        // };
+        //
+        // if button.is_high().unwrap() {
+        //     debounce_cnt = 500;
+        // }
 
-            // match srv.do_work_with_notification(notification) {
-            //     Ok(res) => {
-            //         if let WorkResult::GotDisconnected = res {
-            //             break;
-            //         }
-            //     }
-            //     Err(err) => {
-            //         log::info!("{:?}", err);
-            //     }
-            // }
+        // match srv.do_work_with_notification(notification) {
+        //     Ok(res) => {
+        //         if let WorkResult::GotDisconnected = res {
+        //             break;
+        //         }
+        //     }
+        //     Err(err) => {
+        //         log::info!("{:?}", err);
+        //     }
+        // }
         // }
     }
 }
