@@ -22,6 +22,8 @@ pub const SOC_NAME: &str = "ESP32-S3";
 
 #[entry]
 fn main() -> ! {
+    init_logger_from_env();
+
     log::info!("starting ble app: setup");
 
     let peripherals = Peripherals::take();
