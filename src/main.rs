@@ -11,6 +11,7 @@ use bleps::{
 use esp_backtrace as _;
 use esp_hal::rng::Rng;
 use esp_hal::{clock::ClockControl, peripherals::Peripherals, prelude::*, system::SystemControl};
+use esp_println::logger::init_logger_from_env;
 use esp_wifi::ble::controller::BleConnector;
 use esp_wifi::EspWifiInitFor;
 
