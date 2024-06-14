@@ -8,11 +8,12 @@ license = "Apache-2.0"
 [dependencies]
 # Hardware abstraction layer
 esp-hal = { version = "0.18.0", features = [ "esp32s3" ] }
+
 # Wi-Fi, BLE and ESP-NOW support
-esp-wifi = { version = "0.6.0", features = [ "esp32s3"] }
+esp-wifi = { version = "0.6.0", features = [ "esp32s3", "ble"] }
 
 # print!, println!
-esp-println = { version = "0.9.1", features = ["esp32s3", "log"] }
+esp-println = { version = "0.9.1", features = ["esp32s3", "uart", "log"] }
 
 # Exception and panic handlers
 esp-backtrace = { version = "0.12.0", features = [
@@ -25,6 +26,17 @@ esp-backtrace = { version = "0.12.0", features = [
 # logging
 log = { version = "0.4.21" }
 
+# parse UUID for GAT
+#uuid = "1.8.0"
+
+# p256 = { version = "0.13.2", default-features = false }
+rand_core = "0.6.4"
+
+#bleps = { git = "https://github.com/bjoernQ/bleps.git", features = ["macros", "async", "crypto"] }
+bleps = { git = "https://github.com/bjoernQ/bleps.git", features = ["macros"] }
+heapless = "0.7.16"
+embedded-io = "0.4.0"
+
 [profile.dev]
 # Rust debug is too slow.
 # For debug builds always builds with some optimization
@@ -34,7 +46,7 @@ lto = "off"
 
 [profile.release]
 codegen-units = 1 # LLVM can perform better optimizations using a single thread
-debug = 2
+debug = 2 # include debug information in release builds
 debug-assertions = false
 incremental = false
 # Explicitly disable LTO which the Xtensa codegen backend has issues
