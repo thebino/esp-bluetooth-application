@@ -10,6 +10,7 @@ use bleps::{
 };
 use esp_backtrace as _;
 use esp_hal::rng::Rng;
+use esp_hal::delay::Delay;
 use esp_hal::{clock::ClockControl, peripherals::Peripherals, prelude::*, system::SystemControl};
 use esp_println::logger::init_logger_from_env;
 use esp_wifi::ble::controller::BleConnector;
@@ -31,6 +32,7 @@ fn main() -> ! {
     let system = SystemControl::new(peripherals.SYSTEM);
 
     let clocks = ClockControl::max(system.clock_control).freeze();
+    let delay = Delay::new(&clocks);
 
     let rng = Rng::new(peripherals.RNG);
     let timer = esp_hal::timer::timg::TimerGroup::new(peripherals.TIMG1, &clocks, None).timer0;
@@ -114,6 +116,8 @@ fn main() -> ! {
 
         let mut ble_rng = EspRng(rng);
         let _srv = AttributeServer::new(&mut ble, &mut gatt_attributes, &mut ble_rng);
+
+        delay.delay(500.millis());
 
         // loop {
         //     let mut notification = None;

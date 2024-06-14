@@ -20,6 +20,8 @@ espup install
 
 ## 🚀 Quick start
 
+Enable flash mode by pressing and holding the **BOOT** button, press and release the **RESET** button, and finally release the boot button as well.
+
 Check the connected device
 ```shell
 espflash board-info
@@ -43,12 +45,12 @@ espflash partition-table --to-binary --output partition-table.bin partition-tabl
 
 Build the project
 ```shell
-cargo build
+cargo build --release
 ```
 
 Flash the project by adding the custom partition table as binary
 ```shell
-espflash flash --partition-table partition-table.bin --monitor target/xtensa-esp32s3-none-elf/debug/esp-bluetooth-application
+espflash flash --partition-table partition-table.bin --flash-size 8mb --monitor target/xtensa-esp32s3-none-elf/release/esp-bluetooth-application
 ```
 
 **Follow up deployments can just use the simplified**
